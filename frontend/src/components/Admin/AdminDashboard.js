@@ -4,6 +4,51 @@ import { AuthContext } from '../../context/AuthContext';
 
 // --- Placeholder Components for each management section ---
 // In a real application, these would be in their own files.
+// --- NEW: FacultyApproval Component ---
+const FacultyApproval = ({ token }) => {
+    const [pending, setPending] = useState([]);
+
+    const fetchPending = async () => {
+        try {
+            const config = { headers: { 'Authorization': `Bearer ${token}` } };
+            const res = await axios.get('http://localhost:5000/api/admin/faculty/pending', config);
+            setPending(res.data);
+        } catch (error) {
+            console.error("Could not fetch pending faculty", error);
+        }
+    };
+
+    useEffect(() => {
+        if (token) fetchPending();
+    }, [token]);
+
+    const handleApprove = async (id) => {
+        try {
+            const config = { headers: { 'Authorization': `Bearer ${token}` } };
+            await axios.put(`http://localhost:5000/api/admin/faculty/approve/${id}`, {}, config);
+            // Refresh the list after approval
+            fetchPending();
+        } catch (error) {
+            console.error("Could not approve faculty", error);
+        }
+    };
+
+    return (
+        <div>
+            {pending.length === 0 ? <p>No pending faculty registrations.</p> : (
+                <ul style={styles.list}>
+                    {pending.map(fac => (
+                        <li key={fac._id} style={{...styles.listItem, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <span>{fac.name} ({fac.email}) - {fac.department}</span>
+                            <button onClick={() => handleApprove(fac._id)} style={styles.approveButton}>Approve</button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
+
 
 const UserManagement = ({ users }) => (
     <ul style={styles.list}>
