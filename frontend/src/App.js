@@ -3,12 +3,12 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 
 // Page imports (adjust if needed based on your project structure)
-import LoginPage from './pages/Auth/LoginPage';
-import RegistrationPage from './pages/Auth/RegistrationPage';
+import LoginPage from './Pages/Auth/LoginPage';
+import RegistrationPage from './Pages/Auth/RegistrationPage';
 
-import AdminDashboard from './pages/Admin/AdminDashboard';
-import FacultyDashboard from './pages/Faculty/FacultyDashboard';
-import StudentDashboard from './pages/Student/StudentDashboard';
+import AdminDashboard from './Pages/Admin/AdminDashboard';
+import FacultyDashboard from './Pages/Faculty/FacultyDashboard';
+import StudentDashboard from './Pages/Student/StudentDashboard';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 

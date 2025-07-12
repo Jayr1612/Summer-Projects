@@ -16,7 +16,26 @@ const users = {
     'stu123': { password: 'password', userType: 'student', id: 'STU123' }, // Example student ID login
     'fac456': { password: 'password', userType: 'faculty', id: 'FAC456' } // Example faculty code login
 };
+// ...existing code...
 
+// --- Registration Endpoint ---
+app.post('/api/register', (req, res) => {
+    const { username, password, userType, id } = req.body;
+
+    if (!username || !password || !userType || !id) {
+        return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    if (users[username]) {
+        return res.status(409).json({ message: 'User already exists' });
+    }
+
+    users[username] = { password, userType, id };
+    console.log(`User registered: ${username}`);
+    res.status(201).json({ message: 'Registration successful', userType, userId: id });
+});
+
+// ...existing code...
 // --- Login Endpoint ---
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;

@@ -1,35 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 
-// --- FacultyApproval Component ---
-const FacultyApproval = ({ token }) => {
-    const [pending, setPending] = useState([]);
-
-    const fetchPending = async () => {
-        try {
-            const config = { headers: { 'Authorization': `Bearer ${token}` } };
-            const res = await axios.get('http://localhost:5000/api/admin/faculty/pending', config);
-            setPending(res.data);
-        } catch (error) {
-            console.error("Could not fetch pending faculty", error);
-        }
-    };
-
-    useEffect(() => {
-        if (token) fetchPending();
-    }, [token]);
-
-    const handleApprove = async (id) => {
-        try {
-            const config = { headers: { 'Authorization': `Bearer ${token}` } };
-            await axios.put(`http://localhost:5000/api/admin/faculty/approve/${id}`, {}, config);
-            fetchPending();
-        } catch (error) {
-            console.error("Could not approve faculty", error);
-        }
-    };
-
+// --- Child Component for Displaying Pending Faculty ---
+const FacultyApproval = ({ pending, onApprove }) => {
     return (
         <div>
             {pending.length === 0 ? <p>No pending faculty registrations.</p> : (
@@ -37,7 +11,7 @@ const FacultyApproval = ({ token }) => {
                     {pending.map(fac => (
                         <li key={fac._id} style={{ ...styles.listItem, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span>{fac.name} ({fac.email}) - {fac.department}</span>
-                            <button onClick={() => handleApprove(fac._id)} style={styles.approveButton}>Approve</button>
+                            <button onClick={() => onApprove(fac._id)} style={styles.approveButton}>Approve</button>
                         </li>
                     ))}
                 </ul>
@@ -68,35 +42,47 @@ const CourseManagement = ({ courses }) => (
 );
 
 // --- Placeholder Admin Tools ---
-const TimetableManagement = () => <p>Timetable management tools will be here.</p>;
-const NoticeManagement = () => <p>Academic calendar and notice management tools will be here.</p>;
-const FeeManagement = () => <p>Fee management and payment tracking tools will be here.</p>;
-const OverallManagement = () => <p>Overall site statistics and management tools will be here.</p>;
+const TimetableManagement = () => <p>Tools to create and manage academic timetables will be here.</p>;
+const NoticeManagement = () => <p>Interface to post and manage university-wide notices and the academic calendar.</p>;
+const FeeManagement = () => <p>Tools for fee structure management and tracking payments will be here.</p>;
+const OverallManagement = () => <p>Dashboard with overall statistics and site management tools.</p>;
 
-// --- Main Admin Dashboard ---
+// --- Main AdminDashboard Component ---
 const AdminDashboard = () => {
-    const [users, setUsers] = useState([]);
+    const [allUsers, setAllUsers] = useState([]);
     const [courses, setCourses] = useState([]);
     const { user, logout } = useContext(AuthContext);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const config = {
-                    headers: { 'Authorization': `Bearer ${user.token}` }
-                };
-                const usersRes = await axios.get('http://localhost:5000/api/admin/users', config);
-                setUsers(usersRes.data);
+    const fetchData = useCallback(async () => {
+        if (!user?.token) return;
+        try {
+            const config = { headers: { 'Authorization': `Bearer ${user.token}` } };
+            const usersRes = await axios.get('http://localhost:5000/api/admin/users', config);
+            setAllUsers(usersRes.data);
 
-                const coursesRes = await axios.get('http://localhost:5000/api/admin/courses', config);
-                setCourses(coursesRes.data);
-            } catch (error) {
-                console.error("Failed to fetch admin data", error);
-            }
-        };
-
-        if (user?.token) fetchData();
+            const coursesRes = await axios.get('http://localhost:5000/api/admin/courses', config);
+            setCourses(coursesRes.data);
+        } catch (error) {
+            console.error("Failed to fetch admin data", error);
+        }
     }, [user]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const handleApproveFaculty = async (id) => {
+        try {
+            const config = { headers: { 'Authorization': `Bearer ${user.token}` } };
+            await axios.put(`http://localhost:5000/api/admin/faculty/approve/${id}`, {}, config);
+            fetchData();
+        } catch (error) {
+            console.error("Could not approve faculty", error);
+        }
+    };
+
+    const pendingFaculty = allUsers.filter(u => u.role === 'Faculty' && !u.isApproved);
+    const approvedUsers = allUsers.filter(u => u.isApproved);
 
     return (
         <div style={styles.container}>
@@ -108,12 +94,12 @@ const AdminDashboard = () => {
             <div style={styles.content}>
                 <div style={styles.section}>
                     <h2>Pending Faculty Registrations</h2>
-                    <FacultyApproval token={user?.token} />
+                    <FacultyApproval pending={pendingFaculty} onApprove={handleApproveFaculty} />
                 </div>
 
                 <div style={styles.section}>
-                    <h2>User Management</h2>
-                    <UserManagement users={users.filter(u => u.isApproved)} />
+                    <h2>User Management (Approved)</h2>
+                    <UserManagement users={approvedUsers} />
                 </div>
 
                 <div style={styles.section}>
