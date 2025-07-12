@@ -129,7 +129,15 @@ const LoginPage = () => {
                         Sign In
                     </button>
                 </form>
-                <a href="/forgot-password" style={styles.forgotPassword}>Forgot Password?</a>
+                                <a href="/forgot-password" style={styles.forgotPassword}>Forgot Password?</a>
+                <button
+                    type="button"
+                    style={styles.registerButton}
+                    onClick={() => navigate('/register')}
+                >
+                    Register
+                </button>
+                
                 <div style={styles.mockCredentials}>
                     <strong>Mock Credentials:</strong><br />
                     Admin: admin@example.com / password123<br />
@@ -156,6 +164,20 @@ const styles = {
     button: { padding: '12px 20px', backgroundColor: '#FFA800', color: '#212529', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', marginTop: '10px', transition: 'background-color 0.2s ease' },
     error: { color: '#D93025', fontSize: '14px', textAlign: 'center' },
     forgotPassword: { display: 'block', marginTop: '20px', color: '#6C757D', textDecoration: 'none', fontSize: '14px' },
+    // ...existing code...
+    registerButton: {
+        marginTop: '15px',
+        padding: '10px 20px',
+        backgroundColor: '#fff',
+        color: '#FFA800',
+        border: '2px solid #FFA800',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '15px',
+        fontWeight: 'bold',
+        transition: 'background 0.2s, color 0.2s'
+    },
+// ...existing code...
     mockCredentials: { marginTop: '25px', fontSize: '13px', color: '#6C757D', textAlign: 'left', borderTop: '1px solid #E9ECEF', paddingTop: '15px', lineHeight: '1.6' }
 };
 
