@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { getAllUsers, getCourses } = require('../controllers/adminController');
+const {
+    getAllUsers,
+    getCourses,
+    getPendingFaculty,
+    approveFaculty
+} = require('../controllers/adminController');
 
-// Defines the API endpoints
-// GET /api/admin/users
+// --- Admin routes ---
 router.get('/users', getAllUsers);
-
-// GET /api/admin/courses
 router.get('/courses', getCourses);
+router.get('/faculty/pending', getPendingFaculty);
+router.put('/faculty/approve/:id', approveFaculty); // PUT is appropriate for updates
 
 module.exports = router;

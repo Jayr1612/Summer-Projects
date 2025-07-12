@@ -2,9 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 
-// --- Placeholder Components for each management section ---
-// In a real application, these would be in their own files.
-// --- NEW: FacultyApproval Component ---
+// --- FacultyApproval Component ---
 const FacultyApproval = ({ token }) => {
     const [pending, setPending] = useState([]);
 
@@ -26,7 +24,6 @@ const FacultyApproval = ({ token }) => {
         try {
             const config = { headers: { 'Authorization': `Bearer ${token}` } };
             await axios.put(`http://localhost:5000/api/admin/faculty/approve/${id}`, {}, config);
-            // Refresh the list after approval
             fetchPending();
         } catch (error) {
             console.error("Could not approve faculty", error);
@@ -38,7 +35,7 @@ const FacultyApproval = ({ token }) => {
             {pending.length === 0 ? <p>No pending faculty registrations.</p> : (
                 <ul style={styles.list}>
                     {pending.map(fac => (
-                        <li key={fac._id} style={{...styles.listItem, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <li key={fac._id} style={{ ...styles.listItem, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span>{fac.name} ({fac.email}) - {fac.department}</span>
                             <button onClick={() => handleApprove(fac._id)} style={styles.approveButton}>Approve</button>
                         </li>
@@ -49,7 +46,7 @@ const FacultyApproval = ({ token }) => {
     );
 };
 
-
+// --- Reusable List Display Components ---
 const UserManagement = ({ users }) => (
     <ul style={styles.list}>
         {users.map(u => (
@@ -70,13 +67,13 @@ const CourseManagement = ({ courses }) => (
     </ul>
 );
 
-// Add placeholder components for the other sections
+// --- Placeholder Admin Tools ---
 const TimetableManagement = () => <p>Timetable management tools will be here.</p>;
 const NoticeManagement = () => <p>Academic calendar and notice management tools will be here.</p>;
 const FeeManagement = () => <p>Fee management and payment tracking tools will be here.</p>;
 const OverallManagement = () => <p>Overall site statistics and management tools will be here.</p>;
 
-
+// --- Main Admin Dashboard ---
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
     const [courses, setCourses] = useState([]);
@@ -85,16 +82,12 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Set the authorization token for all requests
                 const config = {
                     headers: { 'Authorization': `Bearer ${user.token}` }
                 };
-                
-                // Fetch users
                 const usersRes = await axios.get('http://localhost:5000/api/admin/users', config);
                 setUsers(usersRes.data);
 
-                // Fetch courses
                 const coursesRes = await axios.get('http://localhost:5000/api/admin/courses', config);
                 setCourses(coursesRes.data);
             } catch (error) {
@@ -102,9 +95,7 @@ const AdminDashboard = () => {
             }
         };
 
-        if (user?.token) {
-            fetchData();
-        }
+        if (user?.token) fetchData();
     }, [user]);
 
     return (
@@ -113,11 +104,16 @@ const AdminDashboard = () => {
                 <h1>Admin Dashboard</h1>
                 <button onClick={logout} style={styles.logoutButton}>Logout</button>
             </header>
-            
+
             <div style={styles.content}>
                 <div style={styles.section}>
+                    <h2>Pending Faculty Registrations</h2>
+                    <FacultyApproval token={user?.token} />
+                </div>
+
+                <div style={styles.section}>
                     <h2>User Management</h2>
-                    <UserManagement users={users} />
+                    <UserManagement users={users.filter(u => u.isApproved)} />
                 </div>
 
                 <div style={styles.section}>
@@ -129,12 +125,12 @@ const AdminDashboard = () => {
                     <h2>Timetable Management</h2>
                     <TimetableManagement />
                 </div>
-                
+
                 <div style={styles.section}>
                     <h2>Notice Management (Academic Calendar)</h2>
                     <NoticeManagement />
                 </div>
-                
+
                 <div style={styles.section}>
                     <h2>Fee Management</h2>
                     <FeeManagement />
@@ -149,21 +145,56 @@ const AdminDashboard = () => {
     );
 };
 
-// Styles for the Admin Dashboard (Scholarly Blue & Amber theme)
+// --- Styles ---
 const styles = {
-    container: { fontFamily: 'sans-serif', backgroundColor: '#F4F7F9', minHeight: '100vh' },
-    header: { backgroundColor: '#0B2A49', color: 'white', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-    logoutButton: { backgroundColor: '#FFC107', color: '#0B2A49', border: 'none', padding: '10px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' },
-    content: { padding: '20px' },
-    section: { 
-        backgroundColor: 'white', 
-        padding: '20px', 
-        borderRadius: '8px', 
-        marginBottom: '20px', 
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)' 
+    container: {
+        fontFamily: 'sans-serif',
+        backgroundColor: '#F4F7F9',
+        minHeight: '100vh'
     },
-    list: { listStyleType: 'none', padding: 0 },
-    listItem: { padding: '10px', borderBottom: '1px solid #eee' }
+    header: {
+        backgroundColor: '#0B2A49',
+        color: 'white',
+        padding: '20px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    logoutButton: {
+        backgroundColor: '#FFC107',
+        color: '#0B2A49',
+        border: 'none',
+        padding: '10px 15px',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        fontWeight: 'bold'
+    },
+    content: {
+        padding: '20px'
+    },
+    section: {
+        backgroundColor: 'white',
+        padding: '20px',
+        borderRadius: '8px',
+        marginBottom: '20px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    },
+    list: {
+        listStyleType: 'none',
+        padding: 0
+    },
+    listItem: {
+        padding: '10px',
+        borderBottom: '1px solid #eee'
+    },
+    approveButton: {
+        background: '#28a745',
+        color: 'white',
+        border: 'none',
+        padding: '5px 10px',
+        borderRadius: '5px',
+        cursor: 'pointer'
+    }
 };
 
 export default AdminDashboard;
