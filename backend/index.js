@@ -18,7 +18,7 @@ const users = {
 };
 // ...existing code...
 
-// --- Registration Endpoint ---
+// --- Registrtion Endpoint ---
 app.post('/api/register', (req, res) => {
     const { username, password, userType, id } = req.body;
 
