@@ -18,6 +18,13 @@ const UserSchema = new mongoose.Schema({
     enum: ['Admin', 'Faculty', 'Student'],
     required: true
   },
+
+   // --- NEW FIELD ---
+  isApproved: {
+    type: Boolean,
+    default: false // Default to not approved
+  },
+  
   uniqueId: {
     type: String,
     unique: true,
